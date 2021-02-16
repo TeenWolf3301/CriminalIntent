@@ -10,6 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,8 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 class CrimeListFragment : Fragment() {
 
     private lateinit var crimeListRecyclerView: RecyclerView
-
-    private var adapter: CrimeAdapter? = null
+    private var adapter: CrimeAdapter? = CrimeAdapter(emptyList())
 
     private val crimeListViewModel: CrimeListViewModel by lazy {
         ViewModelProvider(this).get(CrimeListViewModel::class.java)
@@ -33,14 +33,24 @@ class CrimeListFragment : Fragment() {
 
         crimeListRecyclerView = view.findViewById(R.id.crimeList_recyclerView)
         crimeListRecyclerView.layoutManager = LinearLayoutManager(context)
-
-        updateUI()
+        crimeListRecyclerView.adapter = adapter
 
         return view
     }
 
-    private fun updateUI() {
-        val crimes = crimeListViewModel.crimes
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        crimeListViewModel.crimeListLiveData.observe(
+            viewLifecycleOwner,
+            Observer { crimes ->
+                crimes?.let {
+                    updateUI(crimes)
+                }
+            }
+        )
+    }
+
+    private fun updateUI(crimes: List<Crime>) {
         adapter = CrimeAdapter(crimes)
         crimeListRecyclerView.adapter = adapter
     }
@@ -63,8 +73,8 @@ class CrimeListFragment : Fragment() {
             titleTextView.text = this.crime.title
             dateTextView.text = DateFormat.format("EEEE, MMM dd, yyyy", this.crime.date)
             crimeImageView.visibility = if (this.crime.isSolved) View.VISIBLE else View.GONE
-            crimePoliceButton.visibility =
-                if (this.crime.requiresPolice) View.VISIBLE else View.GONE
+/*            crimePoliceButton.visibility =
+                if (this.crime.requiresPolice) View.VISIBLE else View.GONE*/
         }
 
         override fun onClick(v: View?) {
