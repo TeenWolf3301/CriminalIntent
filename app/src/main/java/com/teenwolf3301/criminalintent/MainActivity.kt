@@ -2,13 +2,20 @@ package com.teenwolf3301.criminalintent
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.teenwolf3301.criminalintent.databinding.ActivityMainBinding
+import com.teenwolf3301.criminalintent.ui.screens.CrimeFragment
+import com.teenwolf3301.criminalintent.ui.screens.crime_list.CrimeListFragment
 import java.util.*
 
 class MainActivity : AppCompatActivity(), CrimeListFragment.Callbacks {
 
+    private lateinit var mBinding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        mBinding = ActivityMainBinding.inflate(layoutInflater)
+        val view = mBinding.root
+        setContentView(view)
 
         val currentFragment = supportFragmentManager.findFragmentById(R.id.frame_container)
 
