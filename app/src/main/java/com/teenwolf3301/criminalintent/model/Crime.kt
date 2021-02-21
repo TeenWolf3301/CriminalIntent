@@ -1,4 +1,4 @@
-package com.teenwolf3301.criminalintent
+package com.teenwolf3301.criminalintent.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

@@ -12,9 +12,9 @@ import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.teenwolf3301.criminalintent.Crime
-import com.teenwolf3301.criminalintent.CrimeDetailViewModel
 import com.teenwolf3301.criminalintent.databinding.FragmentCrimeBinding
+import com.teenwolf3301.criminalintent.model.Crime
+import com.teenwolf3301.criminalintent.model.CrimeDetailViewModel
 import java.util.*
 
 private const val ARG_CRIME_ID = "crime_id"
@@ -98,11 +98,16 @@ class CrimeFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {}
         }
 
+        titleField.addTextChangedListener(titleWatcher)
+
         solvedCheckBox.apply {
-            setOnClickListener {
-                crime.isSolved = isChecked
-            }
+            setOnCheckedChangeListener { _, isChecked -> crime.isSolved = isChecked }
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        crimeDetailViewModel.saveCrime(crime)
     }
 
     companion object {

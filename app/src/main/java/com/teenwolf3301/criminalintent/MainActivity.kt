@@ -7,7 +7,7 @@ import com.teenwolf3301.criminalintent.ui.screens.CrimeFragment
 import com.teenwolf3301.criminalintent.ui.screens.crime_list.CrimeListFragment
 import java.util.*
 
-class MainActivity : AppCompatActivity(), CrimeListFragment.Callbacks {
+class MainActivity : AppCompatActivity() {
 
     private lateinit var mBinding: ActivityMainBinding
 
@@ -16,6 +16,7 @@ class MainActivity : AppCompatActivity(), CrimeListFragment.Callbacks {
         mBinding = ActivityMainBinding.inflate(layoutInflater)
         val view = mBinding.root
         setContentView(view)
+        APP_ACTIVITY = this
 
         val currentFragment = supportFragmentManager.findFragmentById(R.id.frame_container)
 
@@ -28,7 +29,7 @@ class MainActivity : AppCompatActivity(), CrimeListFragment.Callbacks {
         }
     }
 
-    override fun onCrimeSelected(crimeId: UUID) {
+    public fun onCrimeSelected(crimeId: UUID) {
         val fragment = CrimeFragment.newInstance(crimeId)
         supportFragmentManager
             .beginTransaction()

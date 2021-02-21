@@ -1,4 +1,4 @@
-package com.teenwolf3301.criminalintent
+package com.teenwolf3301.criminalintent.database
 
 import android.app.Application
 

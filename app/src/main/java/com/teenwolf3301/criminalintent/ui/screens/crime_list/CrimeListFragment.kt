@@ -9,22 +9,21 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.teenwolf3301.criminalintent.Crime
-import com.teenwolf3301.criminalintent.CrimeListViewModel
+import com.teenwolf3301.criminalintent.model.Crime
+import com.teenwolf3301.criminalintent.model.CrimeListViewModel
 import com.teenwolf3301.criminalintent.databinding.FragmentCrimeListBinding
-import java.util.*
 
 class CrimeListFragment : Fragment() {
 
-    interface Callbacks {
-        fun onCrimeSelected(crimeId: UUID)
-    }
+//    interface Callbacks {
+//        fun onCrimeSelected(crimeId: UUID)
+//    }
 
     private lateinit var crimeListRecyclerView: RecyclerView
 
-    private var callbacks: Callbacks? = null
+//    private var callbacks: Callbacks? = null
     private var _binding: FragmentCrimeListBinding? = null
-    private var adapter: CrimeAdapter? = CrimeAdapter(emptyList(), callbacks)
+    private var adapter: CrimeAdapter? = CrimeAdapter(emptyList())
 
     private val binding get() = _binding!!
     private val crimeListViewModel: CrimeListViewModel by lazy {
@@ -48,7 +47,7 @@ class CrimeListFragment : Fragment() {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        callbacks = context as Callbacks?
+//        callbacks = context as Callbacks?
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -65,11 +64,11 @@ class CrimeListFragment : Fragment() {
 
     override fun onDetach() {
         super.onDetach()
-        callbacks = null
+//        callbacks = null
     }
 
     private fun updateUI(crimes: List<Crime>) {
-        adapter = CrimeAdapter(crimes, callbacks)
+        adapter = CrimeAdapter(crimes)
         crimeListRecyclerView.adapter = adapter
     }
 
