@@ -7,7 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
 
-class CrimeDetailViewModel(application: Application) : AndroidViewModel(application) {
+class CrimeViewModel(application: Application) : AndroidViewModel(application) {
 
     private val crimeRepository = CrimeRepository.get()
     private val crimeIdLiveData = MutableLiveData<UUID>()

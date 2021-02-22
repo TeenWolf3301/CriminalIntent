@@ -13,7 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.teenwolf3301.criminalintent.databinding.FragmentCrimeBinding
 import com.teenwolf3301.criminalintent.model.Crime
-import com.teenwolf3301.criminalintent.model.CrimeDetailViewModel
+import com.teenwolf3301.criminalintent.model.CrimeViewModel
 import java.util.*
 
 private const val ARG_CRIME_ID = "crime_id"
@@ -27,8 +27,8 @@ class CrimeFragment : Fragment() {
 
     private var _binding: FragmentCrimeBinding? = null
 
-    private val crimeDetailViewModel: CrimeDetailViewModel by lazy {
-        ViewModelProvider(this).get(CrimeDetailViewModel::class.java)
+    private val crimeDetailViewModel: CrimeViewModel by lazy {
+        ViewModelProvider(this).get(CrimeViewModel::class.java)
     }
     private val binding get() = _binding!!
 
@@ -100,24 +100,10 @@ class CrimeFragment : Fragment() {
         }
     }
 
-    override fun onStop() {
-        super.onStop()
-        crimeDetailViewModel.saveCrime(crime)
-    }
-
     override fun onPause() {
         super.onPause()
         crimeDetailViewModel.saveCrime(crime)
     }
-
-//    private fun createUpdatedCrime(): Crime {
-//        val updatedCrime = Crime(crime.id)
-//        updatedCrime.title = titleField.toString()
-//        updatedCrime.date = crime.date
-//        updatedCrime.isSolved = solvedCheckBox.isChecked
-//        Toast.makeText(context, "KEK", Toast.LENGTH_SHORT).show()
-//        return updatedCrime
-//    }
 
     private fun updateUI() {
         titleField.setText(crime.title)

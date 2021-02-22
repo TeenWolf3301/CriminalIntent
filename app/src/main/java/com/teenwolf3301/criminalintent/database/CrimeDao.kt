@@ -10,6 +10,7 @@ import java.util.*
 
 @Dao
 interface CrimeDao {
+
     @Query("SELECT * FROM crime")
     fun getCrimes(): LiveData<List<Crime>>
 
