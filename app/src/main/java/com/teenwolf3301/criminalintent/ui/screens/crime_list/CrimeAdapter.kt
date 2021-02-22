@@ -9,7 +9,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.teenwolf3301.criminalintent.databinding.ListItemCrimeBinding
 import com.teenwolf3301.criminalintent.model.Crime
-import com.teenwolf3301.criminalintent.onCrimeSelected
+import com.teenwolf3301.criminalintent.utility.onCrimeSelected
 
 class CrimeAdapter(private var crimes: List<Crime>) :
     RecyclerView.Adapter<CrimeAdapter.CrimeHolder>() {

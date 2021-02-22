@@ -1,4 +1,4 @@
-package com.teenwolf3301.criminalintent.ui.screens
+package com.teenwolf3301.criminalintent.ui.screens.crime
 
 import android.os.Bundle
 import android.text.Editable
@@ -10,15 +10,18 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import com.teenwolf3301.criminalintent.databinding.FragmentCrimeBinding
 import com.teenwolf3301.criminalintent.model.Crime
 import com.teenwolf3301.criminalintent.model.CrimeViewModel
+import com.teenwolf3301.criminalintent.ui.screens.datepicker.DatePickerFragment
+import com.teenwolf3301.criminalintent.utility.ARG_CRIME_ID
+import com.teenwolf3301.criminalintent.utility.REQUEST_DATE
+import com.teenwolf3301.criminalintent.utility.showToast
 import java.util.*
 
-private const val ARG_CRIME_ID = "crime_id"
-
-class CrimeFragment : Fragment() {
+class CrimeFragment : Fragment(), FragmentResultListener {
 
     private lateinit var crime: Crime
     private lateinit var titleField: EditText
@@ -53,13 +56,8 @@ class CrimeFragment : Fragment() {
         dateButton = binding.crimeDateButton
         solvedCheckBox = binding.crimeSolvedCheckBox
 
-        dateButton.apply {
-            text = crime.date.toString()
-            isEnabled = false
-        }
-
         binding.saveButton.setOnClickListener {
-            crimeDetailViewModel.saveCrime(crime)
+            updateCrime()
         }
 
         return view
@@ -77,6 +75,8 @@ class CrimeFragment : Fragment() {
                 }
             }
         )
+
+        parentFragmentManager.setFragmentResultListener(REQUEST_DATE, viewLifecycleOwner, this)
     }
 
     override fun onStart() {
@@ -95,14 +95,24 @@ class CrimeFragment : Fragment() {
 
         titleField.addTextChangedListener(titleWatcher)
 
+        dateButton.setOnClickListener {
+            DatePickerFragment
+                .newInstance(crime.date, REQUEST_DATE)
+                .show(parentFragmentManager, REQUEST_DATE)
+        }
+
         solvedCheckBox.apply {
             setOnCheckedChangeListener { _, isChecked -> crime.isSolved = isChecked }
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-        crimeDetailViewModel.saveCrime(crime)
+    override fun onFragmentResult(requestKey: String, result: Bundle) {
+        when (requestKey) {
+            REQUEST_DATE -> {
+                crime.date = DatePickerFragment.getSelectedDate(result)
+                updateUI()
+            }
+        }
     }
 
     private fun updateUI() {
@@ -111,6 +121,16 @@ class CrimeFragment : Fragment() {
         solvedCheckBox.apply {
             isChecked = crime.isSolved
             jumpDrawablesToCurrentState()
+        }
+    }
+
+    private fun updateCrime() {
+        if (crime.title.isEmpty()) {
+            showToast("Fill the title")
+        } else {
+            crimeDetailViewModel.saveCrime(crime)
+            parentFragmentManager.popBackStack()
+            showToast("Crime ${crime.title} updated!")
         }
     }
 

@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.teenwolf3301.criminalintent.databinding.ActivityMainBinding
 import com.teenwolf3301.criminalintent.ui.screens.crime_list.CrimeListFragment
+import com.teenwolf3301.criminalintent.utility.APP_ACTIVITY
 
 class MainActivity : AppCompatActivity() {
 

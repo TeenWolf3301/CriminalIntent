@@ -10,7 +10,7 @@ import com.teenwolf3301.criminalintent.R
 import com.teenwolf3301.criminalintent.databinding.FragmentCrimeListBinding
 import com.teenwolf3301.criminalintent.model.Crime
 import com.teenwolf3301.criminalintent.model.CrimeListViewModel
-import com.teenwolf3301.criminalintent.onCrimeSelected
+import com.teenwolf3301.criminalintent.utility.onCrimeSelected
 
 class CrimeListFragment : Fragment() {
 
