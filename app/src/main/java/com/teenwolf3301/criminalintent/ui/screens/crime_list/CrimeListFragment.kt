@@ -1,33 +1,33 @@
 package com.teenwolf3301.criminalintent.ui.screens.crime_list
 
-import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.teenwolf3301.criminalintent.R
+import com.teenwolf3301.criminalintent.databinding.FragmentCrimeListBinding
 import com.teenwolf3301.criminalintent.model.Crime
 import com.teenwolf3301.criminalintent.model.CrimeListViewModel
-import com.teenwolf3301.criminalintent.databinding.FragmentCrimeListBinding
+import com.teenwolf3301.criminalintent.onCrimeSelected
 
 class CrimeListFragment : Fragment() {
 
-//    interface Callbacks {
-//        fun onCrimeSelected(crimeId: UUID)
-//    }
-
     private lateinit var crimeListRecyclerView: RecyclerView
 
-//    private var callbacks: Callbacks? = null
     private var _binding: FragmentCrimeListBinding? = null
     private var adapter: CrimeAdapter? = CrimeAdapter(emptyList())
 
     private val binding get() = _binding!!
     private val crimeListViewModel: CrimeListViewModel by lazy {
         ViewModelProvider(this).get(CrimeListViewModel::class.java)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(
@@ -45,13 +45,25 @@ class CrimeListFragment : Fragment() {
         return view
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-//        callbacks = context as Callbacks?
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_list_menu, menu)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.new_crime -> {
+                val crime = Crime()
+                crimeListViewModel.addCrime(crime)
+                onCrimeSelected(crime.id)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
         crimeListViewModel.crimeListLiveData.observe(
             viewLifecycleOwner,
             { crimes ->
@@ -60,11 +72,6 @@ class CrimeListFragment : Fragment() {
                 }
             }
         )
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-//        callbacks = null
     }
 
     private fun updateUI(crimes: List<Crime>) {

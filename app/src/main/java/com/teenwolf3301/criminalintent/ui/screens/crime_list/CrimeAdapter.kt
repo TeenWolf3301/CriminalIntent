@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.teenwolf3301.criminalintent.model.Crime
 import com.teenwolf3301.criminalintent.databinding.ListItemCrimeBinding
+import com.teenwolf3301.criminalintent.model.Crime
 import com.teenwolf3301.criminalintent.onCrimeSelected
 
 class CrimeAdapter(private var crimes: List<Crime>) :

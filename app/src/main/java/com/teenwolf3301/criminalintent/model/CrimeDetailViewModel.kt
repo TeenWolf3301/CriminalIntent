@@ -1,13 +1,13 @@
 package com.teenwolf3301.criminalintent.model
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.*
 import com.teenwolf3301.criminalintent.database.CrimeRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.*
 
-class CrimeDetailViewModel() : ViewModel() {
+class CrimeDetailViewModel(application: Application) : AndroidViewModel(application) {
 
     private val crimeRepository = CrimeRepository.get()
     private val crimeIdLiveData = MutableLiveData<UUID>()
@@ -22,6 +22,8 @@ class CrimeDetailViewModel() : ViewModel() {
     }
 
     fun saveCrime(crime: Crime) {
-        crimeRepository.updateCrime(crime)
+        viewModelScope.launch(Dispatchers.IO) {
+            crimeRepository.updateCrime(crime)
+        }
     }
 }

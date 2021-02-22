@@ -3,9 +3,7 @@ package com.teenwolf3301.criminalintent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.teenwolf3301.criminalintent.databinding.ActivityMainBinding
-import com.teenwolf3301.criminalintent.ui.screens.CrimeFragment
 import com.teenwolf3301.criminalintent.ui.screens.crime_list.CrimeListFragment
-import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,14 +25,5 @@ class MainActivity : AppCompatActivity() {
                 .add(R.id.frame_container, fragment)
                 .commit()
         }
-    }
-
-    public fun onCrimeSelected(crimeId: UUID) {
-        val fragment = CrimeFragment.newInstance(crimeId)
-        supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.frame_container, fragment)
-            .addToBackStack(null)
-            .commit()
     }
 }

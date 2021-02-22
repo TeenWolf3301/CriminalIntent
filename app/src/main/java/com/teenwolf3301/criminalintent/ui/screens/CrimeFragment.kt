@@ -10,7 +10,6 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.teenwolf3301.criminalintent.databinding.FragmentCrimeBinding
 import com.teenwolf3301.criminalintent.model.Crime
@@ -46,6 +45,7 @@ class CrimeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        super.onCreateView(inflater, container, savedInstanceState)
         _binding = FragmentCrimeBinding.inflate(layoutInflater, container, false)
         val view = binding.root
 
@@ -58,6 +58,10 @@ class CrimeFragment : Fragment() {
             isEnabled = false
         }
 
+        binding.saveButton.setOnClickListener {
+            crimeDetailViewModel.saveCrime(crime)
+        }
+
         return view
     }
 
@@ -66,22 +70,13 @@ class CrimeFragment : Fragment() {
 
         crimeDetailViewModel.crimeLiveData.observe(
             viewLifecycleOwner,
-            Observer { crime ->
-                crime?.let {
-                    this.crime = crime
+            { crimeLD ->
+                crimeLD?.let {
+                    this.crime = crimeLD
                     updateUI()
                 }
             }
         )
-    }
-
-    private fun updateUI() {
-        titleField.setText(crime.title)
-        dateButton.text = crime.date.toString()
-        solvedCheckBox.apply {
-            isChecked = crime.isSolved
-            jumpDrawablesToCurrentState()
-        }
     }
 
     override fun onStart() {
@@ -108,6 +103,29 @@ class CrimeFragment : Fragment() {
     override fun onStop() {
         super.onStop()
         crimeDetailViewModel.saveCrime(crime)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        crimeDetailViewModel.saveCrime(crime)
+    }
+
+//    private fun createUpdatedCrime(): Crime {
+//        val updatedCrime = Crime(crime.id)
+//        updatedCrime.title = titleField.toString()
+//        updatedCrime.date = crime.date
+//        updatedCrime.isSolved = solvedCheckBox.isChecked
+//        Toast.makeText(context, "KEK", Toast.LENGTH_SHORT).show()
+//        return updatedCrime
+//    }
+
+    private fun updateUI() {
+        titleField.setText(crime.title)
+        dateButton.text = crime.date.toString()
+        solvedCheckBox.apply {
+            isChecked = crime.isSolved
+            jumpDrawablesToCurrentState()
+        }
     }
 
     companion object {

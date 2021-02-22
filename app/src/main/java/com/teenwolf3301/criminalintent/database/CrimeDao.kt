@@ -17,10 +17,10 @@ interface CrimeDao {
     fun getCrime(id: UUID): LiveData<Crime?>
 
     @Update
-    fun updateCrime(crime: Crime) {
+    suspend fun updateCrime(crime: Crime) {
     }
 
     @Insert
-    fun addCrime(crime: Crime) {
+    suspend fun addCrime(crime: Crime) {
     }
 }
