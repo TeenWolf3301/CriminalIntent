@@ -1,10 +1,7 @@
 package com.teenwolf3301.criminalintent.database
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import com.teenwolf3301.criminalintent.model.Crime
 import java.util.*
 
@@ -18,10 +15,8 @@ interface CrimeDao {
     fun getCrime(id: UUID): LiveData<Crime?>
 
     @Update
-    suspend fun updateCrime(crime: Crime) {
-    }
+    suspend fun updateCrime(crime: Crime)
 
-    @Insert
-    suspend fun addCrime(crime: Crime) {
-    }
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addCrime(crime: Crime): Long
 }
