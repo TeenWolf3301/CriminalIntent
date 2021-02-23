@@ -10,6 +10,7 @@ import com.teenwolf3301.criminalintent.R
 import com.teenwolf3301.criminalintent.databinding.FragmentCrimeListBinding
 import com.teenwolf3301.criminalintent.model.Crime
 import com.teenwolf3301.criminalintent.model.CrimeListViewModel
+import com.teenwolf3301.criminalintent.utility.APP_ACTIVITY
 import com.teenwolf3301.criminalintent.utility.onCrimeSelected
 
 class CrimeListFragment : Fragment() {
@@ -64,6 +65,9 @@ class CrimeListFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+
+        APP_ACTIVITY.title = "Crime List"
+
         crimeListViewModel.crimeListLiveData.observe(
             viewLifecycleOwner,
             { crimes ->
