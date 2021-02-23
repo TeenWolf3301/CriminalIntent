@@ -16,8 +16,10 @@ import com.teenwolf3301.criminalintent.databinding.FragmentCrimeBinding
 import com.teenwolf3301.criminalintent.model.Crime
 import com.teenwolf3301.criminalintent.model.CrimeViewModel
 import com.teenwolf3301.criminalintent.ui.screens.datepicker.DatePickerFragment
+import com.teenwolf3301.criminalintent.ui.screens.timepicker.TimePickerFragment
 import com.teenwolf3301.criminalintent.utility.ARG_CRIME_ID
 import com.teenwolf3301.criminalintent.utility.REQUEST_DATE
+import com.teenwolf3301.criminalintent.utility.REQUEST_TIME
 import com.teenwolf3301.criminalintent.utility.showToast
 import java.util.*
 
@@ -56,10 +58,6 @@ class CrimeFragment : Fragment(), FragmentResultListener {
         dateButton = binding.crimeDateButton
         solvedCheckBox = binding.crimeSolvedCheckBox
 
-        binding.saveButton.setOnClickListener {
-            updateCrime()
-        }
-
         return view
     }
 
@@ -76,7 +74,8 @@ class CrimeFragment : Fragment(), FragmentResultListener {
             }
         )
 
-        parentFragmentManager.setFragmentResultListener(REQUEST_DATE, viewLifecycleOwner, this)
+        childFragmentManager.setFragmentResultListener(REQUEST_DATE, viewLifecycleOwner, this)
+        childFragmentManager.setFragmentResultListener(REQUEST_TIME, viewLifecycleOwner, this)
     }
 
     override fun onStart() {
@@ -96,20 +95,38 @@ class CrimeFragment : Fragment(), FragmentResultListener {
         titleField.addTextChangedListener(titleWatcher)
 
         dateButton.setOnClickListener {
-            DatePickerFragment
-                .newInstance(crime.date, REQUEST_DATE)
-                .show(parentFragmentManager, REQUEST_DATE)
+            datePickerDialog()
         }
 
         solvedCheckBox.apply {
             setOnCheckedChangeListener { _, isChecked -> crime.isSolved = isChecked }
         }
+
+        binding.saveButton.setOnClickListener {
+            updateCrime()
+        }
+    }
+
+    private fun datePickerDialog() {
+        DatePickerFragment
+            .newInstance(crime.date, REQUEST_DATE)
+            .show(childFragmentManager, REQUEST_DATE)
+    }
+
+    private fun timePickerDialog() {
+        TimePickerFragment
+            .newInstance(crime.date, REQUEST_TIME)
+            .show(childFragmentManager, REQUEST_TIME)
     }
 
     override fun onFragmentResult(requestKey: String, result: Bundle) {
         when (requestKey) {
             REQUEST_DATE -> {
                 crime.date = DatePickerFragment.getSelectedDate(result)
+                timePickerDialog()
+            }
+            REQUEST_TIME -> {
+                crime.date = TimePickerFragment.getSelectedTime(result)
                 updateUI()
             }
         }

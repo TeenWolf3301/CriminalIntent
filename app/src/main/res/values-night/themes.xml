@@ -10,7 +10,12 @@
         <item name="colorSecondaryVariant">@color/teal_200</item>
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorSurface</item>
         <!-- Customize your theme here. -->
+        <item name="toolbarStyle">@style/MyDarkToolbar</item>
+    </style>
+
+    <style name="MyDarkToolbar" parent="Widget.MaterialComponents.Toolbar.Surface">
+        <item name="android:background">@drawable/background_toolbar_dark</item>
     </style>
 </resources>
