@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.teenwolf3301.criminalintent.databinding.ListItemCrimeBinding
 import com.teenwolf3301.criminalintent.model.Crime
+import com.teenwolf3301.criminalintent.utility.DATE_FORMAT
 import com.teenwolf3301.criminalintent.utility.onCrimeSelected
 
 class CrimeAdapter(private var crimes: List<Crime>) :
@@ -21,15 +22,12 @@ class CrimeAdapter(private var crimes: List<Crime>) :
         private val title: TextView = binding.crimeTitle
         private val date: TextView = binding.crimeDate
         private val image: ImageView = binding.crimeSolved
-//        private val police: Button = binding.crimePoliceButton
 
         fun bind(crime: Crime) {
             this.crime = crime
             title.text = this.crime.title
-            date.text = DateFormat.format("EEEE, MMM dd, yyyy", this.crime.date)
+            date.text = DateFormat.format(DATE_FORMAT, this.crime.date)
             image.visibility = if (this.crime.isSolved) View.VISIBLE else View.GONE
-/*          police.visibility =
-                if (this.crime.requiresPolice) View.VISIBLE else View.GONE*/
         }
     }
 

@@ -11,3 +11,5 @@ const val REQUEST_TIME = "DialogTime"
 
 const val ARG_DATE = "date"
 const val ARG_REQUEST_CODE = "requestCode"
+
+const val DATE_FORMAT = "EEEE, MMM dd, yyyy"

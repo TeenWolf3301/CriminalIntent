@@ -1,26 +1,24 @@
 package com.teenwolf3301.criminalintent.ui.screens.crime
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.text.format.DateFormat
+import android.view.*
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentResultListener
 import androidx.lifecycle.ViewModelProvider
+import com.teenwolf3301.criminalintent.R
 import com.teenwolf3301.criminalintent.databinding.FragmentCrimeBinding
 import com.teenwolf3301.criminalintent.model.Crime
 import com.teenwolf3301.criminalintent.model.CrimeViewModel
 import com.teenwolf3301.criminalintent.ui.screens.datepicker.DatePickerFragment
 import com.teenwolf3301.criminalintent.ui.screens.timepicker.TimePickerFragment
-import com.teenwolf3301.criminalintent.utility.ARG_CRIME_ID
-import com.teenwolf3301.criminalintent.utility.REQUEST_DATE
-import com.teenwolf3301.criminalintent.utility.REQUEST_TIME
-import com.teenwolf3301.criminalintent.utility.showToast
+import com.teenwolf3301.criminalintent.utility.*
 import java.util.*
 
 class CrimeFragment : Fragment(), FragmentResultListener {
@@ -28,6 +26,7 @@ class CrimeFragment : Fragment(), FragmentResultListener {
     private lateinit var crime: Crime
     private lateinit var titleField: EditText
     private lateinit var dateButton: Button
+    private lateinit var sendReportButton: Button
     private lateinit var solvedCheckBox: CheckBox
 
     private var _binding: FragmentCrimeBinding? = null
@@ -43,6 +42,8 @@ class CrimeFragment : Fragment(), FragmentResultListener {
         crime = Crime()
         val crimeId = arguments?.getSerializable(ARG_CRIME_ID) as UUID
         crimeDetailViewModel.loadCrime(crimeId)
+
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(
@@ -56,6 +57,7 @@ class CrimeFragment : Fragment(), FragmentResultListener {
 
         titleField = binding.crimeTitleEditText
         dateButton = binding.crimeDateButton
+        sendReportButton = binding.crimeReportButton
         solvedCheckBox = binding.crimeSolvedCheckBox
 
         return view
@@ -102,8 +104,14 @@ class CrimeFragment : Fragment(), FragmentResultListener {
             setOnCheckedChangeListener { _, isChecked -> crime.isSolved = isChecked }
         }
 
-        binding.saveButton.setOnClickListener {
-            updateCrime()
+        sendReportButton.setOnClickListener {
+            Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, sendCrimeReport())
+                putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject))
+            }.also {
+                startActivity(it)
+            }
         }
     }
 
@@ -132,6 +140,21 @@ class CrimeFragment : Fragment(), FragmentResultListener {
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_crime_menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.save_crime -> {
+                updateCrime()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     private fun updateUI() {
         titleField.setText(crime.title)
         dateButton.text = crime.date.toString()
@@ -149,6 +172,26 @@ class CrimeFragment : Fragment(), FragmentResultListener {
             parentFragmentManager.popBackStack()
             showToast("Crime ${crime.title} updated!")
         }
+    }
+
+    private fun sendCrimeReport(): String {
+        val solvedString = if (crime.isSolved) {
+            getString(R.string.crime_report_solved)
+        } else getString(R.string.crime_report_unsolved)
+
+        val dateString = DateFormat.format(DATE_FORMAT, crime.date).toString()
+
+        val suspectString = if (crime.suspect.isBlank()) {
+            getString(R.string.crime_report_no_suspect)
+        } else getString(R.string.crime_report_suspect, crime.suspect)
+
+        return getString(
+            R.string.crime_report,
+            crime.title,
+            dateString,
+            solvedString,
+            suspectString
+        )
     }
 
     companion object {

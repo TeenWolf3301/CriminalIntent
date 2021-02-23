@@ -75,8 +75,16 @@ class CrimeListFragment : Fragment() {
     }
 
     private fun updateUI(crimes: List<Crime>) {
-        adapter = CrimeAdapter(crimes)
-        crimeListRecyclerView.adapter = adapter
+        if (crimes.isEmpty()) {
+            binding.crimeListRecyclerView.visibility = View.GONE
+            binding.emptyListText.visibility = View.VISIBLE
+        } else {
+            binding.crimeListRecyclerView.visibility = View.VISIBLE
+            binding.emptyListText.visibility = View.GONE
+            adapter = CrimeAdapter(crimes)
+            crimeListRecyclerView.adapter = adapter
+        }
+
     }
 
     override fun onDestroyView() {

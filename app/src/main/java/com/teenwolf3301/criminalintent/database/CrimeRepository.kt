@@ -14,7 +14,8 @@ class CrimeRepository private constructor(context: Context) {
         context.applicationContext,
         CrimeDatabase::class.java,
         DATABASE_NAME
-    ).build()
+    ).addMigrations(migration_1_2)
+        .build()
     private val crimeDao = database.crimeDao()
 
     fun getCrimes(): LiveData<List<Crime>> = crimeDao.getCrimes()
