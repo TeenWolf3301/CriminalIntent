@@ -6,14 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.teenwolf3301.criminalintent.databinding.ListItemCrimeBinding
 import com.teenwolf3301.criminalintent.model.Crime
 import com.teenwolf3301.criminalintent.utility.DATE_FORMAT
 import com.teenwolf3301.criminalintent.utility.onCrimeSelected
 
-class CrimeAdapter(private var crimes: List<Crime>) :
-    RecyclerView.Adapter<CrimeAdapter.CrimeHolder>() {
+class CrimeAdapter() :
+    ListAdapter<Crime, CrimeAdapter.CrimeHolder>(CrimeItemCallback()) {
 
     inner class CrimeHolder(binding: ListItemCrimeBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -38,12 +39,10 @@ class CrimeAdapter(private var crimes: List<Crime>) :
     }
 
     override fun onBindViewHolder(holder: CrimeHolder, position: Int) {
-        val crime = crimes[position]
+        val crime = getItem(position)
         holder.bind(crime)
         holder.itemView.setOnClickListener {
             onCrimeSelected(crime.id)
         }
     }
-
-    override fun getItemCount() = crimes.size
 }

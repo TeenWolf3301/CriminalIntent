@@ -18,7 +18,7 @@ class CrimeListFragment : Fragment() {
     private lateinit var crimeListRecyclerView: RecyclerView
 
     private var _binding: FragmentCrimeListBinding? = null
-    private var adapter: CrimeAdapter? = CrimeAdapter(emptyList())
+    private var adapter: CrimeAdapter? = CrimeAdapter()
 
     private val binding get() = _binding!!
     private val crimeListViewModel: CrimeListViewModel by lazy {
@@ -85,7 +85,7 @@ class CrimeListFragment : Fragment() {
         } else {
             binding.crimeListRecyclerView.visibility = View.VISIBLE
             binding.emptyListText.visibility = View.GONE
-            adapter = CrimeAdapter(crimes)
+            adapter!!.submitList(crimes)
             crimeListRecyclerView.adapter = adapter
         }
 
