@@ -2,6 +2,7 @@ package com.teenwolf3301.criminalintent.ui.screens.crime
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
@@ -9,10 +10,9 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.text.format.DateFormat
 import android.view.*
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentResultListener
 import androidx.lifecycle.ViewModelProvider
@@ -23,16 +23,14 @@ import com.teenwolf3301.criminalintent.model.CrimeViewModel
 import com.teenwolf3301.criminalintent.ui.screens.datepicker.DatePickerFragment
 import com.teenwolf3301.criminalintent.ui.screens.timepicker.TimePickerFragment
 import com.teenwolf3301.criminalintent.utility.*
+import java.io.File
 import java.util.*
 
 class CrimeFragment : Fragment(), FragmentResultListener {
 
     private lateinit var crime: Crime
-    private lateinit var titleField: EditText
-    private lateinit var dateButton: Button
-    private lateinit var sendReportButton: Button
-    private lateinit var pickSuspectButton: Button
-    private lateinit var solvedCheckBox: CheckBox
+    private lateinit var photoFile: File
+    private lateinit var photoUri: Uri
 
     private var _binding: FragmentCrimeBinding? = null
 
@@ -58,8 +56,11 @@ class CrimeFragment : Fragment(), FragmentResultListener {
                 updateUI()
             }
         }
-
     }
+    private val resultPhotoLauncher =
+        registerForActivityResult(ActivityResultContracts.TakePicture()) {
+            if (it) updatePhotoView()
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,15 +79,8 @@ class CrimeFragment : Fragment(), FragmentResultListener {
     ): View {
         super.onCreateView(inflater, container, savedInstanceState)
         _binding = FragmentCrimeBinding.inflate(layoutInflater, container, false)
-        val view = binding.root
 
-        titleField = binding.crimeTitleEditText
-        dateButton = binding.crimeDateButton
-        sendReportButton = binding.crimeReportButton
-        pickSuspectButton = binding.crimeSuspectButton
-        solvedCheckBox = binding.crimeSolvedCheckBox
-
-        return view
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -97,6 +91,12 @@ class CrimeFragment : Fragment(), FragmentResultListener {
             { crimeLD ->
                 crimeLD?.let {
                     this.crime = crimeLD
+                    photoFile = crimeDetailViewModel.getPhotoFile(crime)
+                    photoUri = FileProvider.getUriForFile(
+                        requireActivity(),
+                        "com.teenwolf3301.criminalintent.fileprovider",
+                        photoFile
+                    )
                     updateUI()
                 }
             }
@@ -122,21 +122,31 @@ class CrimeFragment : Fragment(), FragmentResultListener {
             override fun afterTextChanged(s: Editable?) {}
         }
 
-        titleField.addTextChangedListener(titleWatcher)
+        binding.crimeTitleEditText.addTextChangedListener(titleWatcher)
 
-        dateButton.setOnClickListener { datePickerDialog() }
+        binding.crimeDateBtn.setOnClickListener { datePickerDialog() }
 
-        solvedCheckBox.apply {
+        binding.crimeSolvedCheckBox.apply {
             setOnCheckedChangeListener { _, isChecked ->
                 crime.isSolved = isChecked
             }
         }
 
-        sendReportButton.setOnClickListener { sendCrimeReport() }
+        binding.sendCrimeReportBtn.setOnClickListener { sendCrimeReport() }
 
-        pickSuspectButton.setOnClickListener {
+        binding.pickCrimeSuspectBtn.apply {
+            val packageManager: PackageManager = requireActivity().packageManager
             val intent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
-            resultLauncher.launch(intent)
+            if (packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY) == null) {
+                isEnabled = false
+            }
+            setOnClickListener {
+                resultLauncher.launch(intent)
+            }
+        }
+
+        binding.crimeImageBtn.setOnClickListener {
+            resultPhotoLauncher.launch(photoUri)
         }
     }
 
@@ -168,6 +178,11 @@ class CrimeFragment : Fragment(), FragmentResultListener {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+    }
+
     private fun datePickerDialog() {
         DatePickerFragment
             .newInstance(crime.date, REQUEST_DATE)
@@ -181,15 +196,25 @@ class CrimeFragment : Fragment(), FragmentResultListener {
     }
 
     private fun updateUI() {
-        titleField.setText(crime.title)
-        dateButton.text = crime.date.toString()
-        solvedCheckBox.apply {
+        binding.crimeTitleEditText.setText(crime.title)
+        binding.crimeDateBtn.text = crime.date.toString()
+        binding.crimeSolvedCheckBox.apply {
             isChecked = crime.isSolved
             jumpDrawablesToCurrentState()
         }
         if (crime.suspect.isNotEmpty()) {
-            pickSuspectButton.text = crime.suspect
+            binding.pickCrimeSuspectBtn.text = crime.suspect
         }
+        updatePhotoView()
+    }
+
+    private fun updatePhotoView() {
+        binding.crimeImage.setImageBitmap(
+            if (photoFile.exists()) {
+                getScaledBitmap(photoFile.path, requireActivity())
+            } else
+                null
+        )
     }
 
     private fun updateCrime() {

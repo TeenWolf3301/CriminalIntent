@@ -4,6 +4,6 @@
     <item
         android:id="@+id/save_crime"
         android:icon="@drawable/ic_save_crime"
-        android:title="@string/new_crime"
+        android:title="@string/save_crime_menu"
         app:showAsAction="ifRoom|withText" />
 </menu>

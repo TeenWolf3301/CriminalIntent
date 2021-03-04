@@ -5,12 +5,7 @@ import com.teenwolf3301.criminalintent.model.Crime
 
 class CrimeItemCallback : DiffUtil.ItemCallback<Crime>() {
 
-    override fun areItemsTheSame(oldItem: Crime, newItem: Crime): Boolean {
-        return oldItem.id == newItem.id
-    }
+    override fun areItemsTheSame(oldItem: Crime, newItem: Crime): Boolean = oldItem.id == newItem.id
 
-
-    override fun areContentsTheSame(oldItem: Crime, newItem: Crime): Boolean {
-        return oldItem == newItem
-    }
+    override fun areContentsTheSame(oldItem: Crime, newItem: Crime): Boolean = oldItem == newItem
 }

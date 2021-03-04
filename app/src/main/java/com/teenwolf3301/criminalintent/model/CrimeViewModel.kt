@@ -5,6 +5,7 @@ import androidx.lifecycle.*
 import com.teenwolf3301.criminalintent.database.CrimeRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.File
 import java.util.*
 
 class CrimeViewModel(application: Application) : AndroidViewModel(application) {
@@ -25,5 +26,9 @@ class CrimeViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch(Dispatchers.IO) {
             crimeRepository.updateCrime(crime)
         }
+    }
+
+    fun getPhotoFile(crime: Crime): File {
+        return crimeRepository.getPhotoFile(crime)
     }
 }
