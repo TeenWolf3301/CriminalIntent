@@ -1,8 +1,6 @@
 package com.teenwolf3301.criminalintent.ui.screens.crime
 
-import android.app.Activity
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
@@ -11,7 +9,6 @@ import android.text.TextWatcher
 import android.text.format.DateFormat
 import android.view.*
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentResultListener
@@ -38,10 +35,8 @@ class CrimeFragment : Fragment(), FragmentResultListener {
         ViewModelProvider(this).get(CrimeViewModel::class.java)
     }
     private val binding get() = _binding!!
-    private val resultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val data: Intent? = result.data
-            val contactUri: Uri? = data?.data
+    private val resultContactLauncher =
+        registerForActivityResult(ActivityResultContracts.PickContact()) { contactUri ->
             val queryFields = arrayOf(ContactsContract.Contacts.DISPLAY_NAME)
             val cursor = requireActivity().contentResolver
                 .query(contactUri!!, queryFields, null, null, null)
@@ -56,7 +51,6 @@ class CrimeFragment : Fragment(), FragmentResultListener {
                 updateUI()
             }
         }
-    }
     private val resultPhotoLauncher =
         registerForActivityResult(ActivityResultContracts.TakePicture()) {
             if (it) updatePhotoView()
@@ -134,20 +128,9 @@ class CrimeFragment : Fragment(), FragmentResultListener {
 
         binding.sendCrimeReportBtn.setOnClickListener { sendCrimeReport() }
 
-        binding.pickCrimeSuspectBtn.apply {
-            val packageManager: PackageManager = requireActivity().packageManager
-            val intent = Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI)
-            if (packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY) == null) {
-                isEnabled = false
-            }
-            setOnClickListener {
-                resultLauncher.launch(intent)
-            }
-        }
+        binding.pickCrimeSuspectBtn.setOnClickListener { resultContactLauncher.launch(null) }
 
-        binding.crimeImageBtn.setOnClickListener {
-            resultPhotoLauncher.launch(photoUri)
-        }
+        binding.crimeImageBtn.setOnClickListener { resultPhotoLauncher.launch(photoUri) }
     }
 
     override fun onFragmentResult(requestKey: String, result: Bundle) {
@@ -180,6 +163,7 @@ class CrimeFragment : Fragment(), FragmentResultListener {
 
     override fun onDestroy() {
         super.onDestroy()
+        showToast(if (isCrimeUpdated()) "True" else "False")
         _binding = null
     }
 
@@ -255,6 +239,12 @@ class CrimeFragment : Fragment(), FragmentResultListener {
         }.also {
             startActivity(it)
         }
+    }
+
+    private fun isCrimeUpdated(): Boolean {
+        crimeDetailViewModel.loadCrime(crime.id)
+        val oldCrime = crimeDetailViewModel.crimeLiveData.value
+        return oldCrime == this.crime
     }
 
     companion object {
