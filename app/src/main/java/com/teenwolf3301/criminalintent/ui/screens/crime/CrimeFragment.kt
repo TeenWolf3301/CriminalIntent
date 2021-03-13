@@ -1,5 +1,6 @@
 package com.teenwolf3301.criminalintent.ui.screens.crime
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -128,9 +129,12 @@ class CrimeFragment : Fragment(), FragmentResultListener {
 
         binding.sendCrimeReportBtn.setOnClickListener { sendCrimeReport() }
 
+        // TODO Btn to call a suspect
         binding.pickCrimeSuspectBtn.setOnClickListener { resultContactLauncher.launch(null) }
 
         binding.crimeImageBtn.setOnClickListener { resultPhotoLauncher.launch(photoUri) }
+
+        binding.crimeSaveBtn.setOnClickListener { updateCrime() }
     }
 
     override fun onFragmentResult(requestKey: String, result: Bundle) {
@@ -153,17 +157,29 @@ class CrimeFragment : Fragment(), FragmentResultListener {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.save_crime -> {
-                updateCrime()
+            R.id.delete_crime -> {
+                deleteCrime()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
+    private fun deleteCrime() {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setPositiveButton("Yes") { _, _ ->
+            crimeDetailViewModel.deleteCrime(crime)
+            parentFragmentManager.popBackStack()
+            showToast("Successfully removed ${crime.title} crime")
+        }
+        builder.setNegativeButton("No") { _, _ -> }
+        builder.setTitle("Delete crime?")
+        builder.setMessage("Are you sure you want to delete ${crime.title} crime?")
+        builder.create().show()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        showToast(if (isCrimeUpdated()) "True" else "False")
         _binding = null
     }
 
@@ -193,6 +209,9 @@ class CrimeFragment : Fragment(), FragmentResultListener {
     }
 
     private fun updatePhotoView() {
+        // TODO Output of the full-size image in DialogFragment
+        // TODO Efficient loading of image preview
+
         binding.crimeImage.setImageBitmap(
             if (photoFile.exists()) {
                 getScaledBitmap(photoFile.path, requireActivity())
@@ -239,12 +258,6 @@ class CrimeFragment : Fragment(), FragmentResultListener {
         }.also {
             startActivity(it)
         }
-    }
-
-    private fun isCrimeUpdated(): Boolean {
-        crimeDetailViewModel.loadCrime(crime.id)
-        val oldCrime = crimeDetailViewModel.crimeLiveData.value
-        return oldCrime == this.crime
     }
 
     companion object {

@@ -2,7 +2,8 @@
     <string name="app_name">CriminalIntent</string>
 
     <string name="new_crime_menu">New Crime</string>
-    <string name="save_crime_menu">New Crime</string>
+    <string name="delete_crime_menu">Save Crime</string>
+    <string name="delete_all_crimes_menu">Delete All Crimes</string>
 
     <string name="crime_title_hint">Enter a title for the crime.</string>
     <string name="crime_title_label">Title</string>
@@ -22,4 +23,5 @@
 
     <string name="desc_crime_image">Crime Image</string>
     <string name="desc_set_crime_image">Set Crime Image</string>
+    <string name="desc_crime_save">SaveCrime</string>
 </resources>

@@ -16,4 +16,10 @@ class CrimeListViewModel : ViewModel() {
             crimeRepository.addCrime(crime)
         }
     }
+
+    fun deleteAllCrimes() {
+        viewModelScope.launch(Dispatchers.IO) {
+            crimeRepository.deleteAllCrimes()
+        }
+    }
 }

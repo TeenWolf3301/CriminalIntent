@@ -24,6 +24,10 @@ class CrimeRepository private constructor(context: Context) {
 
     fun getCrime(id: UUID): LiveData<Crime?> = crimeDao.getCrime(id)
 
+    suspend fun deleteCrime(crime: Crime) = crimeDao.deleteCrime(crime)
+
+    suspend fun deleteAllCrimes() = crimeDao.deleteAllCrimes()
+
     fun getPhotoFile(crime: Crime): File = File(filesDir, crime.photoFileName)
 
     suspend fun updateCrime(crime: Crime) {

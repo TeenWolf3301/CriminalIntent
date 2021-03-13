@@ -1,5 +1,6 @@
 package com.teenwolf3301.criminalintent.ui.screens.crime_list
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
@@ -12,6 +13,7 @@ import com.teenwolf3301.criminalintent.model.Crime
 import com.teenwolf3301.criminalintent.model.CrimeListViewModel
 import com.teenwolf3301.criminalintent.utility.APP_ACTIVITY
 import com.teenwolf3301.criminalintent.utility.onCrimeSelected
+import com.teenwolf3301.criminalintent.utility.showToast
 
 class CrimeListFragment : Fragment() {
 
@@ -54,13 +56,33 @@ class CrimeListFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.new_crime -> {
-                val crime = Crime()
-                crimeListViewModel.addCrime(crime)
-                onCrimeSelected(crime.id)
+                createNewCrime()
+                true
+            }
+            R.id.delete_all_crimes -> {
+                deleteAllCrimes()
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun deleteAllCrimes() {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setPositiveButton("Yes") { _, _ ->
+            crimeListViewModel.deleteAllCrimes()
+            showToast("Successfully removed all crimes")
+        }
+        builder.setNegativeButton("No") { _, _ -> }
+        builder.setTitle("Delete everything?")
+        builder.setMessage("Are you sure you want to delete everything?")
+        builder.create().show()
+    }
+
+    private fun createNewCrime() {
+        val crime = Crime()
+        crimeListViewModel.addCrime(crime)
+        onCrimeSelected(crime.id)
     }
 
     override fun onStart() {

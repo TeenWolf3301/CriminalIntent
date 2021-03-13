@@ -31,4 +31,10 @@ class CrimeViewModel(application: Application) : AndroidViewModel(application) {
     fun getPhotoFile(crime: Crime): File {
         return crimeRepository.getPhotoFile(crime)
     }
+
+    fun deleteCrime(crime: Crime) {
+        viewModelScope.launch(Dispatchers.IO) {
+            crimeRepository.deleteCrime(crime)
+        }
+    }
 }

@@ -19,4 +19,10 @@ interface CrimeDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addCrime(crime: Crime): Long
+
+    @Delete
+    suspend fun deleteCrime(crime: Crime)
+
+    @Query("DELETE FROM crime")
+    suspend fun deleteAllCrimes()
 }
