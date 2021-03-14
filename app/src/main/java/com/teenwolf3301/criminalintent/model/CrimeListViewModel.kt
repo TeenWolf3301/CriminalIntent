@@ -20,6 +20,7 @@ class CrimeListViewModel : ViewModel() {
     fun deleteAllCrimes() {
         viewModelScope.launch(Dispatchers.IO) {
             crimeRepository.deleteAllCrimes()
+            crimeRepository.clearFileFolder()
         }
     }
 }

@@ -61,10 +61,13 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
 
     // Room
-    implementation 'androidx.room:room-runtime:2.3.0-beta02'
-    kapt 'androidx.room:room-compiler:2.3.0-beta02'
-    implementation 'androidx.room:room-ktx:2.3.0-beta02'
+    implementation 'androidx.room:room-runtime:2.3.0-beta03'
+    kapt 'androidx.room:room-compiler:2.3.0-beta03'
+    implementation 'androidx.room:room-ktx:2.3.0-beta03'
 
     // Coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.1'
+
+    // Coil
+    implementation("io.coil-kt:coil:1.1.1")
 }

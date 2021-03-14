@@ -2,7 +2,7 @@
     <string name="app_name">CriminalIntent</string>
 
     <string name="new_crime_menu">New Crime</string>
-    <string name="delete_crime_menu">Save Crime</string>
+    <string name="delete_crime_menu">Delete Crime</string>
     <string name="delete_all_crimes_menu">Delete All Crimes</string>
 
     <string name="crime_title_hint">Enter a title for the crime.</string>

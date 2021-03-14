@@ -28,6 +28,8 @@ class CrimeRepository private constructor(context: Context) {
 
     suspend fun deleteAllCrimes() = crimeDao.deleteAllCrimes()
 
+    fun clearFileFolder() = filesDir?.listFiles()?.forEach { it.delete() }
+
     fun getPhotoFile(crime: Crime): File = File(filesDir, crime.photoFileName)
 
     suspend fun updateCrime(crime: Crime) {

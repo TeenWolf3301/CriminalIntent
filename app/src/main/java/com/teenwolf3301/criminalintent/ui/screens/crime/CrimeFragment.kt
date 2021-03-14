@@ -14,6 +14,8 @@ import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentResultListener
 import androidx.lifecycle.ViewModelProvider
+import coil.load
+import coil.transform.CircleCropTransformation
 import com.teenwolf3301.criminalintent.R
 import com.teenwolf3301.criminalintent.databinding.FragmentCrimeBinding
 import com.teenwolf3301.criminalintent.model.Crime
@@ -169,6 +171,7 @@ class CrimeFragment : Fragment(), FragmentResultListener {
         val builder = AlertDialog.Builder(requireContext())
         builder.setPositiveButton("Yes") { _, _ ->
             crimeDetailViewModel.deleteCrime(crime)
+            if (photoFile.exists()) photoFile.delete()
             parentFragmentManager.popBackStack()
             showToast("Successfully removed ${crime.title} crime")
         }
@@ -211,13 +214,13 @@ class CrimeFragment : Fragment(), FragmentResultListener {
     private fun updatePhotoView() {
         // TODO Output of the full-size image in DialogFragment
         // TODO Efficient loading of image preview
-
-        binding.crimeImage.setImageBitmap(
-            if (photoFile.exists()) {
-                getScaledBitmap(photoFile.path, requireActivity())
-            } else
-                null
-        )
+        if (photoFile.exists()) {
+            binding.crimeImage.load(photoUri) {
+                crossfade(true)
+                crossfade(1000)
+                transformations(CircleCropTransformation())
+            }
+        }
     }
 
     private fun updateCrime() {
