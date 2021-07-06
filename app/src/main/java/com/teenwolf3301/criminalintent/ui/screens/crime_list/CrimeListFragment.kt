@@ -4,7 +4,7 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.teenwolf3301.criminalintent.R
@@ -23,15 +23,7 @@ class CrimeListFragment : Fragment() {
     private var adapter: CrimeAdapter? = CrimeAdapter()
 
     private val binding get() = _binding!!
-    private val crimeListViewModel: CrimeListViewModel by lazy {
-        ViewModelProvider(this).get(CrimeListViewModel::class.java)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setHasOptionsMenu(true)
-    }
+    private val crimeListViewModel: CrimeListViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,10 +34,26 @@ class CrimeListFragment : Fragment() {
         val view = binding.root
 
         crimeListRecyclerView = binding.crimeListRecyclerView
-        crimeListRecyclerView.layoutManager = LinearLayoutManager(context)
-        crimeListRecyclerView.adapter = adapter
+        crimeListRecyclerView.apply {
+            layoutManager = LinearLayoutManager(context)
+            crimeListRecyclerView.adapter = adapter
+        }
 
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        APP_ACTIVITY.title = "Crime List"
+
+        crimeListViewModel.crimeListLiveData.observe(viewLifecycleOwner) { crimes ->
+            crimes?.let {
+                updateUI(crimes)
+            }
+        }
+
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -83,21 +91,6 @@ class CrimeListFragment : Fragment() {
         val crime = Crime()
         crimeListViewModel.addCrime(crime)
         onCrimeSelected(crime.id)
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        APP_ACTIVITY.title = "Crime List"
-
-        crimeListViewModel.crimeListLiveData.observe(
-            viewLifecycleOwner,
-            { crimes ->
-                crimes?.let {
-                    updateUI(crimes)
-                }
-            }
-        )
     }
 
     private fun updateUI(crimes: List<Crime>) {

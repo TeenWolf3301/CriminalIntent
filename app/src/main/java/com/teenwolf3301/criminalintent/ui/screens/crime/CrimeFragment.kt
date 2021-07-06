@@ -9,11 +9,12 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.text.format.DateFormat
 import android.view.*
+import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentResultListener
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import coil.load
 import coil.transform.CircleCropTransformation
 import com.teenwolf3301.criminalintent.R
@@ -34,9 +35,7 @@ class CrimeFragment : Fragment(), FragmentResultListener {
 
     private var _binding: FragmentCrimeBinding? = null
 
-    private val crimeDetailViewModel: CrimeViewModel by lazy {
-        ViewModelProvider(this).get(CrimeViewModel::class.java)
-    }
+    private val crimeDetailViewModel: CrimeViewModel by viewModels()
     private val binding get() = _binding!!
     private val resultContactLauncher =
         registerForActivityResult(ActivityResultContracts.PickContact()) { contactUri ->
@@ -59,16 +58,6 @@ class CrimeFragment : Fragment(), FragmentResultListener {
             if (it) updatePhotoView()
         }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        crime = Crime()
-        val crimeId = arguments?.getSerializable(ARG_CRIME_ID) as UUID
-        crimeDetailViewModel.loadCrime(crimeId)
-
-        setHasOptionsMenu(true)
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -83,30 +72,22 @@ class CrimeFragment : Fragment(), FragmentResultListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        crimeDetailViewModel.crimeLiveData.observe(
-            viewLifecycleOwner,
-            { crimeLD ->
-                crimeLD?.let {
-                    this.crime = crimeLD
-                    photoFile = crimeDetailViewModel.getPhotoFile(crime)
-                    photoUri = FileProvider.getUriForFile(
-                        requireActivity(),
-                        "com.teenwolf3301.criminalintent.fileprovider",
-                        photoFile
-                    )
-                    updateUI()
-                }
-            }
-        )
-
-        childFragmentManager.setFragmentResultListener(REQUEST_DATE, viewLifecycleOwner, this)
-        childFragmentManager.setFragmentResultListener(REQUEST_TIME, viewLifecycleOwner, this)
-    }
-
-    override fun onStart() {
-        super.onStart()
-
+        val crimeId = arguments?.getSerializable(ARG_CRIME_ID) as UUID
+        crimeDetailViewModel.loadCrime(crimeId)
         APP_ACTIVITY.title = "Crime"
+
+        crimeDetailViewModel.crimeLiveData.observe(viewLifecycleOwner) { crimeLD ->
+            crimeLD?.let {
+                crime = it
+                photoFile = crimeDetailViewModel.getPhotoFile(it)
+                photoUri = FileProvider.getUriForFile(
+                    requireActivity(),
+                    "com.teenwolf3301.criminalintent.fileprovider",
+                    photoFile
+                )
+                updateUI()
+            }
+        }
 
         val titleWatcher = object : TextWatcher {
 
@@ -119,24 +100,33 @@ class CrimeFragment : Fragment(), FragmentResultListener {
             override fun afterTextChanged(s: Editable?) {}
         }
 
-        binding.crimeTitleEditText.addTextChangedListener(titleWatcher)
-
-        binding.crimeDateBtn.setOnClickListener { datePickerDialog() }
-
-        binding.crimeSolvedCheckBox.apply {
-            setOnCheckedChangeListener { _, isChecked ->
-                crime.isSolved = isChecked
+        binding.apply {
+            crimeTitleEditText.addTextChangedListener(titleWatcher)
+            crimeDateBtn.setOnClickListener { datePickerDialog() }
+            crimeSolvedCheckBox.apply {
+                setOnCheckedChangeListener { _, isChecked ->
+                    crime.isSolved = isChecked
+                }
             }
+
+            sendCrimeReportBtn.setOnClickListener { sendCrimeReport() }
+
+            // TODO Btn to call a suspect
+            pickCrimeSuspectBtn.setOnClickListener { resultContactLauncher.launch(null) }
+
+            crimeImageBtn.setOnClickListener { resultPhotoLauncher.launch(photoUri) }
+
+            crimeSaveBtn.setOnClickListener { updateCrime() }
         }
 
-        binding.sendCrimeReportBtn.setOnClickListener { sendCrimeReport() }
+        childFragmentManager.setFragmentResultListener(REQUEST_DATE, viewLifecycleOwner, this)
+        childFragmentManager.setFragmentResultListener(REQUEST_TIME, viewLifecycleOwner, this)
 
-        // TODO Btn to call a suspect
-        binding.pickCrimeSuspectBtn.setOnClickListener { resultContactLauncher.launch(null) }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            parentFragmentManager.popBackStack()
+        }
 
-        binding.crimeImageBtn.setOnClickListener { resultPhotoLauncher.launch(photoUri) }
-
-        binding.crimeSaveBtn.setOnClickListener { updateCrime() }
+        setHasOptionsMenu(true)
     }
 
     override fun onFragmentResult(requestKey: String, result: Bundle) {
@@ -167,23 +157,25 @@ class CrimeFragment : Fragment(), FragmentResultListener {
         }
     }
 
-    private fun deleteCrime() {
-        val builder = AlertDialog.Builder(requireContext())
-        builder.setPositiveButton("Yes") { _, _ ->
-            crimeDetailViewModel.deleteCrime(crime)
-            if (photoFile.exists()) photoFile.delete()
-            parentFragmentManager.popBackStack()
-            showToast("Successfully removed ${crime.title} crime")
-        }
-        builder.setNegativeButton("No") { _, _ -> }
-        builder.setTitle("Delete crime?")
-        builder.setMessage("Are you sure you want to delete ${crime.title} crime?")
-        builder.create().show()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
+    }
+
+    private fun deleteCrime() {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.apply {
+            setPositiveButton("Yes") { _, _ ->
+                crimeDetailViewModel.deleteCrime(crime)
+                if (photoFile.exists()) photoFile.delete()
+                parentFragmentManager.popBackStack()
+                showToast("Successfully removed ${crime.title} crime")
+            }
+            setNegativeButton("No") { _, _ -> }
+            setTitle("Delete crime?")
+            setMessage("Are you sure you want to delete ${crime.title} crime?")
+            create().show()
+        }
     }
 
     private fun datePickerDialog() {
@@ -199,14 +191,16 @@ class CrimeFragment : Fragment(), FragmentResultListener {
     }
 
     private fun updateUI() {
-        binding.crimeTitleEditText.setText(crime.title)
-        binding.crimeDateBtn.text = crime.date.toString()
-        binding.crimeSolvedCheckBox.apply {
-            isChecked = crime.isSolved
-            jumpDrawablesToCurrentState()
-        }
-        if (crime.suspect.isNotEmpty()) {
-            binding.pickCrimeSuspectBtn.text = crime.suspect
+        binding.apply {
+            crimeTitleEditText.setText(crime.title)
+            crimeDateBtn.text = crime.date.toString()
+            crimeSolvedCheckBox.apply {
+                isChecked = crime.isSolved
+                jumpDrawablesToCurrentState()
+            }
+            if (crime.suspect.isNotEmpty()) {
+                pickCrimeSuspectBtn.text = crime.suspect
+            }
         }
         updatePhotoView()
     }
@@ -225,7 +219,7 @@ class CrimeFragment : Fragment(), FragmentResultListener {
 
     private fun updateCrime() {
         if (crime.title.isEmpty()) {
-            showToast("Fill the title")
+            showToast("Fill the title!")
         } else {
             crimeDetailViewModel.saveCrime(crime)
             parentFragmentManager.popBackStack()

@@ -26,7 +26,6 @@ class DatePickerFragment : DialogFragment() {
                 parentFragmentManager.setFragmentResult(resultRequestCode, result)
             }
 
-
         val date = arguments?.getSerializable(ARG_DATE) as Date
         val calendar = Calendar.getInstance()
         calendar.time = date

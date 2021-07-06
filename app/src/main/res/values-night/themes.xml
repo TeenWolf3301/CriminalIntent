@@ -6,16 +6,16 @@
         <item name="colorPrimaryVariant">@color/blue_700</item>
         <item name="colorOnPrimary">@color/black</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_200</item>
+        <item name="colorSecondary">@color/blue_200</item>
+        <item name="colorSecondaryVariant">@color/blue_700</item>
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorSurface</item>
-        <!-- Customize your theme here. -->
-        <item name="toolbarStyle">@style/MyDarkToolbar</item>
-    </style>
+        <!-- Additional color attributes -->
+        <item name="android:colorBackground">@color/shark</item>
+        <item name="colorOnBackground">@color/alabaster</item>
 
-    <style name="MyDarkToolbar" parent="Widget.MaterialComponents.Toolbar.Surface">
-        <item name="android:background">@drawable/background_toolbar_dark</item>
+        <item name="colorSurface">@color/shark</item>
+        <item name="colorOnSurface">@color/alabaster</item>
     </style>
 </resources>
