@@ -10,13 +10,28 @@ import androidx.recyclerview.widget.RecyclerView
 import com.teenwolf3301.criminalintent.databinding.ListItemCrimeBinding
 import com.teenwolf3301.criminalintent.model.Crime
 import com.teenwolf3301.criminalintent.utility.DATE_FORMAT
-import com.teenwolf3301.criminalintent.utility.onCrimeSelected
 
-class CrimeAdapter() :
+class CrimeAdapter(private val listener: OnItemClickListener) :
     ListAdapter<Crime, CrimeAdapter.CrimeHolder>(DiffCallback()) {
+
+    interface OnItemClickListener {
+        fun onItemClick(crime: Crime)
+    }
 
     inner class CrimeHolder(private val binding: ListItemCrimeBinding) :
         RecyclerView.ViewHolder(binding.root) {
+
+        init {
+            binding.apply {
+                root.setOnClickListener {
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        val crime = getItem(position)
+                        listener.onItemClick(crime)
+                    }
+                }
+            }
+        }
 
         fun bind(crime: Crime) {
             binding.apply {
@@ -43,11 +58,6 @@ class CrimeAdapter() :
 
     override fun onBindViewHolder(holder: CrimeHolder, position: Int) {
         val crime = getItem(position)
-        holder.apply {
-            bind(crime)
-            itemView.setOnClickListener {
-                onCrimeSelected(crime.id)
-            }
-        }
+        holder.bind(crime)
     }
 }

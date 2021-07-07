@@ -9,34 +9,33 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.text.format.DateFormat
 import android.view.*
-import androidx.activity.addCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentResultListener
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import coil.load
 import coil.transform.CircleCropTransformation
 import com.teenwolf3301.criminalintent.R
 import com.teenwolf3301.criminalintent.databinding.FragmentCrimeBinding
-import com.teenwolf3301.criminalintent.model.Crime
 import com.teenwolf3301.criminalintent.model.CrimeViewModel
 import com.teenwolf3301.criminalintent.ui.screens.datepicker.DatePickerFragment
 import com.teenwolf3301.criminalintent.ui.screens.timepicker.TimePickerFragment
 import com.teenwolf3301.criminalintent.utility.*
+import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import java.util.*
 
-class CrimeFragment : Fragment(), FragmentResultListener {
+@AndroidEntryPoint
+class CrimeFragment : Fragment(R.layout.fragment_crime), FragmentResultListener {
 
-    private lateinit var crime: Crime
     private lateinit var photoFile: File
     private lateinit var photoUri: Uri
 
     private var _binding: FragmentCrimeBinding? = null
-
-    private val crimeDetailViewModel: CrimeViewModel by viewModels()
     private val binding get() = _binding!!
+    private val crimeDetailViewModel: CrimeViewModel by viewModels()
     private val resultContactLauncher =
         registerForActivityResult(ActivityResultContracts.PickContact()) { contactUri ->
             val queryFields = arrayOf(ContactsContract.Contacts.DISPLAY_NAME)
@@ -49,13 +48,17 @@ class CrimeFragment : Fragment(), FragmentResultListener {
 
                 it.moveToFirst()
                 val suspect = it.getString(0)
-                crime.suspect = suspect
-                updateUI()
+                crimeDetailViewModel.crimeSuspect = suspect
+                binding.pickCrimeSuspectBtn.text = crimeDetailViewModel.crimeSuspect
             }
         }
     private val resultPhotoLauncher =
         registerForActivityResult(ActivityResultContracts.TakePicture()) {
-            if (it) updatePhotoView()
+            if (it) binding.crimeImage.load(photoUri) {
+                crossfade(true)
+                crossfade(1000)
+                transformations(CircleCropTransformation())
+            }
         }
 
     override fun onCreateView(
@@ -63,81 +66,95 @@ class CrimeFragment : Fragment(), FragmentResultListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        super.onCreateView(inflater, container, savedInstanceState)
-        _binding = FragmentCrimeBinding.inflate(layoutInflater, container, false)
-
-        return binding.root
+        _binding = FragmentCrimeBinding.inflate(inflater, container, false)
+        val view = binding.root
+        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val crimeId = arguments?.getSerializable(ARG_CRIME_ID) as UUID
-        crimeDetailViewModel.loadCrime(crimeId)
-        APP_ACTIVITY.title = "Crime"
-
-        crimeDetailViewModel.crimeLiveData.observe(viewLifecycleOwner) { crimeLD ->
-            crimeLD?.let {
-                crime = it
-                photoFile = crimeDetailViewModel.getPhotoFile(it)
-                photoUri = FileProvider.getUriForFile(
-                    requireActivity(),
-                    "com.teenwolf3301.criminalintent.fileprovider",
-                    photoFile
-                )
-                updateUI()
-            }
-        }
+        val filesDir = requireActivity().applicationContext.filesDir
 
         val titleWatcher = object : TextWatcher {
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                crime.title = s.toString()
+                crimeDetailViewModel.crimeTitle = s.toString()
             }
 
             override fun afterTextChanged(s: Editable?) {}
         }
 
         binding.apply {
+            crimeTitleEditText.setText(crimeDetailViewModel.crimeTitle)
             crimeTitleEditText.addTextChangedListener(titleWatcher)
-            crimeDateBtn.setOnClickListener { datePickerDialog() }
-            crimeSolvedCheckBox.apply {
-                setOnCheckedChangeListener { _, isChecked ->
-                    crime.isSolved = isChecked
+
+            val path = crimeDetailViewModel.crimePhotoFileName
+            photoFile = File(filesDir, path)
+            photoUri = FileProvider.getUriForFile(
+                requireActivity(),
+                "com.teenwolf3301.criminalintent.fileprovider",
+                photoFile
+            )
+            if (photoFile.exists()) {
+                crimeImage.load(photoUri) {
+                    crossfade(true)
+                    crossfade(1000)
+                    transformations(CircleCropTransformation())
                 }
+            }
+
+            crimeImageBtn.setOnClickListener {
+                resultPhotoLauncher.launch(photoUri)
+            }
+
+            crimeDateBtn.text = crimeDetailViewModel.crimeDate.toString()
+            crimeDateBtn.setOnClickListener { datePickerDialog() }
+
+            crimeSolvedCheckBox.apply {
+                isChecked = crimeDetailViewModel.crimeSolved
+                jumpDrawablesToCurrentState()
+                setOnCheckedChangeListener { _, isChecked ->
+                    crimeDetailViewModel.crimeSolved = isChecked
+                }
+            }
+
+            pickCrimeSuspectBtn.apply {
+                setOnClickListener { resultContactLauncher.launch(null) }
+                text =
+                    if (crimeDetailViewModel.crimeSuspect.isBlank()) "Choose suspect"
+                    else crimeDetailViewModel.crimeSuspect
             }
 
             sendCrimeReportBtn.setOnClickListener { sendCrimeReport() }
 
-            // TODO Btn to call a suspect
-            pickCrimeSuspectBtn.setOnClickListener { resultContactLauncher.launch(null) }
-
-            crimeImageBtn.setOnClickListener { resultPhotoLauncher.launch(photoUri) }
-
-            crimeSaveBtn.setOnClickListener { updateCrime() }
+            crimeSaveBtn.setOnClickListener {
+                if (crimeDetailViewModel.crimeTitle.isBlank()) {
+                    showToast("Fill the title!")
+                } else {
+                    crimeDetailViewModel.onSaveClick()
+                    findNavController().popBackStack()
+                }
+            }
         }
 
         childFragmentManager.setFragmentResultListener(REQUEST_DATE, viewLifecycleOwner, this)
         childFragmentManager.setFragmentResultListener(REQUEST_TIME, viewLifecycleOwner, this)
 
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            parentFragmentManager.popBackStack()
-        }
-
-        setHasOptionsMenu(true)
+        if (crimeDetailViewModel.crime != null) setHasOptionsMenu(true)
     }
 
     override fun onFragmentResult(requestKey: String, result: Bundle) {
         when (requestKey) {
             REQUEST_DATE -> {
-                crime.date = DatePickerFragment.getSelectedDate(result)
+                crimeDetailViewModel.crimeDate = DatePickerFragment.getSelectedDate(result)
                 timePickerDialog()
             }
             REQUEST_TIME -> {
-                crime.date = TimePickerFragment.getSelectedTime(result)
-                updateUI()
+                crimeDetailViewModel.crimeDate = TimePickerFragment.getSelectedTime(result)
+                binding.crimeDateBtn.text = crimeDetailViewModel.crimeDate.toString()
             }
         }
     }
@@ -166,81 +183,44 @@ class CrimeFragment : Fragment(), FragmentResultListener {
         val builder = AlertDialog.Builder(requireContext())
         builder.apply {
             setPositiveButton("Yes") { _, _ ->
-                crimeDetailViewModel.deleteCrime(crime)
+                crimeDetailViewModel.onDeleteClick()
                 if (photoFile.exists()) photoFile.delete()
-                parentFragmentManager.popBackStack()
-                showToast("Successfully removed ${crime.title} crime")
+                findNavController().popBackStack()
+                showToast("Successfully removed ${crimeDetailViewModel.crimeTitle} crime")
             }
             setNegativeButton("No") { _, _ -> }
             setTitle("Delete crime?")
-            setMessage("Are you sure you want to delete ${crime.title} crime?")
+            setMessage("Are you sure you want to delete ${crimeDetailViewModel.crimeTitle} crime?")
             create().show()
         }
     }
 
     private fun datePickerDialog() {
         DatePickerFragment
-            .newInstance(crime.date, REQUEST_DATE)
+            .newInstance(crimeDetailViewModel.crimeDate, REQUEST_DATE)
             .show(childFragmentManager, REQUEST_DATE)
     }
 
     private fun timePickerDialog() {
         TimePickerFragment
-            .newInstance(crime.date, REQUEST_TIME)
+            .newInstance(crimeDetailViewModel.crimeDate, REQUEST_TIME)
             .show(childFragmentManager, REQUEST_TIME)
     }
 
-    private fun updateUI() {
-        binding.apply {
-            crimeTitleEditText.setText(crime.title)
-            crimeDateBtn.text = crime.date.toString()
-            crimeSolvedCheckBox.apply {
-                isChecked = crime.isSolved
-                jumpDrawablesToCurrentState()
-            }
-            if (crime.suspect.isNotEmpty()) {
-                pickCrimeSuspectBtn.text = crime.suspect
-            }
-        }
-        updatePhotoView()
-    }
-
-    private fun updatePhotoView() {
-        // TODO Output of the full-size image in DialogFragment
-        // TODO Efficient loading of image preview
-        if (photoFile.exists()) {
-            binding.crimeImage.load(photoUri) {
-                crossfade(true)
-                crossfade(1000)
-                transformations(CircleCropTransformation())
-            }
-        }
-    }
-
-    private fun updateCrime() {
-        if (crime.title.isEmpty()) {
-            showToast("Fill the title!")
-        } else {
-            crimeDetailViewModel.saveCrime(crime)
-            parentFragmentManager.popBackStack()
-            showToast("Crime ${crime.title} updated!")
-        }
-    }
-
     private fun createCrimeReport(): String {
-        val solvedString = if (crime.isSolved) {
+        val solvedString = if (crimeDetailViewModel.crimeSolved) {
             getString(R.string.crime_report_solved)
         } else getString(R.string.crime_report_unsolved)
 
-        val dateString = DateFormat.format(DATE_FORMAT, crime.date).toString()
+        val dateString = DateFormat.format(DATE_FORMAT, crimeDetailViewModel.crimeDate).toString()
 
-        val suspectString = if (crime.suspect.isBlank()) {
+        val suspectString = if (crimeDetailViewModel.crimeSuspect.isBlank()) {
             getString(R.string.crime_report_no_suspect)
-        } else getString(R.string.crime_report_suspect, crime.suspect)
+        } else getString(R.string.crime_report_suspect, crimeDetailViewModel.crimeSuspect)
 
         return getString(
             R.string.crime_report,
-            crime.title,
+            crimeDetailViewModel.crimeTitle,
             dateString,
             solvedString,
             suspectString
@@ -254,17 +234,6 @@ class CrimeFragment : Fragment(), FragmentResultListener {
             putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject))
         }.also {
             startActivity(it)
-        }
-    }
-
-    companion object {
-        fun newInstance(crimeId: UUID): CrimeFragment {
-            val args = Bundle().apply {
-                putSerializable(ARG_CRIME_ID, crimeId)
-            }
-            return CrimeFragment().apply {
-                arguments = args
-            }
         }
     }
 }

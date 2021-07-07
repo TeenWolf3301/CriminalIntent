@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center">
+    android:gravity="center"
+    tools:context=".ui.screens.crime_list.CrimeListFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/crimeList_recyclerView"

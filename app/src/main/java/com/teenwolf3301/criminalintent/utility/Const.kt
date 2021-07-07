@@ -1,6 +1,6 @@
 package com.teenwolf3301.criminalintent.utility
 
-import com.teenwolf3301.criminalintent.MainActivity
+import com.teenwolf3301.criminalintent.ui.MainActivity
 
 lateinit var APP_ACTIVITY: MainActivity
 

@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    tools:context=".ui.screens.crime.CrimeFragment">
 
     <ImageView
         android:id="@+id/crimeImage"
@@ -22,7 +23,7 @@
         android:layout_marginTop="8dp"
         android:background="?attr/colorPrimary"
         android:contentDescription="@string/desc_set_crime_image"
-        android:padding="3dp"
+        android:padding="4dp"
         android:src="@drawable/ic_crime_camera"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/crimeImage" />

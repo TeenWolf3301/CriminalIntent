@@ -1,5 +1,10 @@
 buildscript {
-    ext.kotlin_version = '1.4.31'
+    ext {
+        kotlin_version = '1.5.10'
+        minSdkVersion = 21
+        targetSdkVersion = 30
+        compileSdkVersion = 30
+    }
     repositories {
         google()
         mavenCentral()
@@ -7,6 +12,12 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:4.2.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+
+        // Navigation
+        classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.3.5"
+
+        // Hilt
+        classpath "com.google.dagger:hilt-android-gradle-plugin:2.33-beta"
     }
 }
 

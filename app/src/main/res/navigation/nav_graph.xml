@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/crimeListFragment">
+
+    <activity
+        android:id="@+id/mainActivity"
+        android:name="com.teenwolf3301.criminalintent.ui.MainActivity"
+        android:label="APP_ACTIVITY"
+        tools:layout="@layout/activity_main" />
+    <fragment
+        android:id="@+id/crimeFragment"
+        android:name="com.teenwolf3301.criminalintent.ui.screens.crime.CrimeFragment"
+        android:label="{title}"
+        tools:layout="@layout/fragment_crime">
+        <argument
+            android:name="crime"
+            android:defaultValue="@null"
+            app:argType="com.teenwolf3301.criminalintent.model.Crime"
+            app:nullable="true" />
+        <argument
+            android:name="title"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/crimeListFragment"
+        android:name="com.teenwolf3301.criminalintent.ui.screens.crime_list.CrimeListFragment"
+        android:label="CrimeList"
+        tools:layout="@layout/fragment_crime_list">
+        <action
+            android:id="@+id/action_crimeListFragment_to_crimeFragment"
+            app:destination="@id/crimeFragment" />
+    </fragment>
+</navigation>
