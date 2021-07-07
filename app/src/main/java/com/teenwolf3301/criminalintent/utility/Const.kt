@@ -4,8 +4,6 @@ import com.teenwolf3301.criminalintent.ui.MainActivity
 
 lateinit var APP_ACTIVITY: MainActivity
 
-const val ARG_CRIME_ID = "crime_id"
-
 const val REQUEST_DATE = "DialogDate"
 const val REQUEST_TIME = "DialogTime"
 

@@ -19,7 +19,6 @@
     <string name="crime_report_no_suspect">there is no suspect.</string>
     <string name="crime_report_suspect">the suspect is %s.</string>
     <string name="crime_report_subject">CriminalIntent Crime Report</string>
-    <string name="send_report">Send crime report via</string>
 
     <string name="desc_crime_image">Crime Image</string>
     <string name="desc_set_crime_image">Set Crime Image</string>
