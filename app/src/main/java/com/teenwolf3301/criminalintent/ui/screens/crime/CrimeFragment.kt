@@ -20,8 +20,8 @@ import coil.transform.CircleCropTransformation
 import com.teenwolf3301.criminalintent.R
 import com.teenwolf3301.criminalintent.databinding.FragmentCrimeBinding
 import com.teenwolf3301.criminalintent.model.CrimeViewModel
-import com.teenwolf3301.criminalintent.ui.screens.datepicker.DatePickerFragment
-import com.teenwolf3301.criminalintent.ui.screens.timepicker.TimePickerFragment
+import com.teenwolf3301.criminalintent.ui.screens.dialogs.DatePickerFragment
+import com.teenwolf3301.criminalintent.ui.screens.dialogs.TimePickerFragment
 import com.teenwolf3301.criminalintent.utility.*
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
@@ -99,10 +99,15 @@ class CrimeFragment : Fragment(R.layout.fragment_crime), FragmentResultListener 
                 photoFile
             )
             if (photoFile.exists()) {
-                crimeImage.load(photoUri) {
-                    crossfade(true)
-                    crossfade(1000)
-                    transformations(CircleCropTransformation())
+                crimeImage.apply {
+                    load(photoUri) {
+                        crossfade(true)
+                        crossfade(1000)
+                        transformations(CircleCropTransformation())
+                    }
+                    setOnClickListener {
+                        showPreviewPhotoDialog()
+                    }
                 }
             }
 
@@ -110,8 +115,10 @@ class CrimeFragment : Fragment(R.layout.fragment_crime), FragmentResultListener 
                 resultPhotoLauncher.launch(photoUri)
             }
 
-            crimeDateBtn.text = crimeDetailViewModel.crimeDate.toString()
-            crimeDateBtn.setOnClickListener { datePickerDialog() }
+            crimeDateBtn.apply{
+                text = crimeDetailViewModel.crimeDate.toString()
+                setOnClickListener { showDatePickerDialog() }
+            }
 
             crimeSolvedCheckBox.apply {
                 isChecked = crimeDetailViewModel.crimeSolved
@@ -143,6 +150,7 @@ class CrimeFragment : Fragment(R.layout.fragment_crime), FragmentResultListener 
         childFragmentManager.setFragmentResultListener(REQUEST_DATE, viewLifecycleOwner, this)
         childFragmentManager.setFragmentResultListener(REQUEST_TIME, viewLifecycleOwner, this)
 
+        // Show delete item in menu only in Crime Update
         if (crimeDetailViewModel.crime != null) setHasOptionsMenu(true)
     }
 
@@ -150,7 +158,7 @@ class CrimeFragment : Fragment(R.layout.fragment_crime), FragmentResultListener 
         when (requestKey) {
             REQUEST_DATE -> {
                 crimeDetailViewModel.crimeDate = DatePickerFragment.getSelectedDate(result)
-                timePickerDialog()
+                showTimePickerDialog()
             }
             REQUEST_TIME -> {
                 crimeDetailViewModel.crimeDate = TimePickerFragment.getSelectedTime(result)
@@ -195,13 +203,17 @@ class CrimeFragment : Fragment(R.layout.fragment_crime), FragmentResultListener 
         }
     }
 
-    private fun datePickerDialog() {
+    private fun showPreviewPhotoDialog() {
+        // TODO
+    }
+
+    private fun showDatePickerDialog() {
         DatePickerFragment
             .newInstance(crimeDetailViewModel.crimeDate, REQUEST_DATE)
             .show(childFragmentManager, REQUEST_DATE)
     }
 
-    private fun timePickerDialog() {
+    private fun showTimePickerDialog() {
         TimePickerFragment
             .newInstance(crimeDetailViewModel.crimeDate, REQUEST_TIME)
             .show(childFragmentManager, REQUEST_TIME)

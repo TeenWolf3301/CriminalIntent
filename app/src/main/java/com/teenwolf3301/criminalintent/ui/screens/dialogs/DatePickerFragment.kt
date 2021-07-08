@@ -1,4 +1,4 @@
-package com.teenwolf3301.criminalintent.ui.screens.datepicker
+package com.teenwolf3301.criminalintent.ui.screens.dialogs
 
 import android.app.DatePickerDialog
 import android.app.Dialog

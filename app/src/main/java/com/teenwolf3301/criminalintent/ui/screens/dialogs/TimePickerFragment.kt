@@ -1,4 +1,4 @@
-package com.teenwolf3301.criminalintent.ui.screens.timepicker
+package com.teenwolf3301.criminalintent.ui.screens.dialogs
 
 import android.app.Dialog
 import android.app.TimePickerDialog
