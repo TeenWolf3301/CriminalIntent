@@ -41,16 +41,13 @@ class DatePickerFragment : DialogFragment() {
     }
 
     companion object {
-        fun newInstance(date: Date, requestCode: String): DatePickerFragment {
-            val args = Bundle().apply {
-                putSerializable(ARG_DATE, date)
-                putString(ARG_REQUEST_CODE, requestCode)
+        fun newInstance(date: Date, requestCode: String): DatePickerFragment =
+            DatePickerFragment().apply {
+                arguments = Bundle().apply {
+                    putSerializable(ARG_DATE, date)
+                    putString(ARG_REQUEST_CODE, requestCode)
+                }
             }
-
-            return DatePickerFragment().apply {
-                arguments = args
-            }
-        }
 
         fun getSelectedDate(result: Bundle) = result.getSerializable(REQUEST_DATE) as Date
     }

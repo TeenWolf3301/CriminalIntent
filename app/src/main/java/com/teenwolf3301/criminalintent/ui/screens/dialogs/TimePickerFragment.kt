@@ -50,16 +50,13 @@ class TimePickerFragment : DialogFragment() {
     }
 
     companion object {
-        fun newInstance(date: Date, requestCode: String): TimePickerFragment {
-            val args = Bundle().apply {
-                putSerializable(ARG_DATE, date)
-                putString(ARG_REQUEST_CODE, requestCode)
+        fun newInstance(date: Date, requestCode: String): TimePickerFragment =
+            TimePickerFragment().apply {
+                arguments = Bundle().apply {
+                    putSerializable(ARG_DATE, date)
+                    putString(ARG_REQUEST_CODE, requestCode)
+                }
             }
-
-            return TimePickerFragment().apply {
-                arguments = args
-            }
-        }
 
         fun getSelectedTime(result: Bundle) = result.getSerializable(REQUEST_TIME) as Date
     }

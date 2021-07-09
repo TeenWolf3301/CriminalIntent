@@ -21,6 +21,7 @@ import com.teenwolf3301.criminalintent.R
 import com.teenwolf3301.criminalintent.databinding.FragmentCrimeBinding
 import com.teenwolf3301.criminalintent.model.CrimeViewModel
 import com.teenwolf3301.criminalintent.ui.screens.dialogs.DatePickerFragment
+import com.teenwolf3301.criminalintent.ui.screens.dialogs.PhotoPreviewFragment
 import com.teenwolf3301.criminalintent.ui.screens.dialogs.TimePickerFragment
 import com.teenwolf3301.criminalintent.utility.*
 import dagger.hilt.android.AndroidEntryPoint
@@ -38,27 +39,12 @@ class CrimeFragment : Fragment(R.layout.fragment_crime), FragmentResultListener 
     private val crimeDetailViewModel: CrimeViewModel by viewModels()
     private val resultContactLauncher =
         registerForActivityResult(ActivityResultContracts.PickContact()) { contactUri ->
-            val queryFields = arrayOf(ContactsContract.Contacts.DISPLAY_NAME)
-            val cursor = requireActivity().contentResolver
-                .query(contactUri!!, queryFields, null, null, null)
-            cursor?.use {
-                if (it.count == 0) {
-                    return@use
-                }
-
-                it.moveToFirst()
-                val suspect = it.getString(0)
-                crimeDetailViewModel.crimeSuspect = suspect
-                binding.pickCrimeSuspectBtn.text = crimeDetailViewModel.crimeSuspect
-            }
+            pickContact(contactUri)
         }
+
     private val resultPhotoLauncher =
         registerForActivityResult(ActivityResultContracts.TakePicture()) {
-            if (it) binding.crimeImage.load(photoUri) {
-                crossfade(true)
-                crossfade(1000)
-                transformations(CircleCropTransformation())
-            }
+            if (it) updateCrimePhoto()
         }
 
     override fun onCreateView(
@@ -67,14 +53,11 @@ class CrimeFragment : Fragment(R.layout.fragment_crime), FragmentResultListener 
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentCrimeBinding.inflate(inflater, container, false)
-        val view = binding.root
-        return view
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val filesDir = requireActivity().applicationContext.filesDir
 
         val titleWatcher = object : TextWatcher {
 
@@ -91,31 +74,13 @@ class CrimeFragment : Fragment(R.layout.fragment_crime), FragmentResultListener 
             crimeTitleEditText.setText(crimeDetailViewModel.crimeTitle)
             crimeTitleEditText.addTextChangedListener(titleWatcher)
 
-            val path = crimeDetailViewModel.crimePhotoFileName
-            photoFile = File(filesDir, path)
-            photoUri = FileProvider.getUriForFile(
-                requireActivity(),
-                "com.teenwolf3301.criminalintent.fileprovider",
-                photoFile
-            )
-            if (photoFile.exists()) {
-                crimeImage.apply {
-                    load(photoUri) {
-                        crossfade(true)
-                        crossfade(1000)
-                        transformations(CircleCropTransformation())
-                    }
-                    setOnClickListener {
-                        showPreviewPhotoDialog()
-                    }
-                }
-            }
+            updateCrimePhoto()
 
             crimeImageBtn.setOnClickListener {
                 resultPhotoLauncher.launch(photoUri)
             }
 
-            crimeDateBtn.apply{
+            crimeDateBtn.apply {
                 text = crimeDetailViewModel.crimeDate.toString()
                 setOnClickListener { showDatePickerDialog() }
             }
@@ -187,6 +152,62 @@ class CrimeFragment : Fragment(R.layout.fragment_crime), FragmentResultListener 
         _binding = null
     }
 
+    private fun showPreviewPhotoDialog() {
+        PhotoPreviewFragment
+            .newInstance(photoUri.toString())
+            .show(childFragmentManager, SHOW_PREVIEW)
+    }
+
+    private fun showDatePickerDialog() {
+        DatePickerFragment
+            .newInstance(crimeDetailViewModel.crimeDate, REQUEST_DATE)
+            .show(childFragmentManager, REQUEST_DATE)
+    }
+
+    private fun showTimePickerDialog() {
+        TimePickerFragment
+            .newInstance(crimeDetailViewModel.crimeDate, REQUEST_TIME)
+            .show(childFragmentManager, REQUEST_TIME)
+    }
+
+    private fun pickContact(contactUri: Uri) {
+        val queryFields = arrayOf(ContactsContract.Contacts.DISPLAY_NAME)
+        val cursor = requireActivity().contentResolver
+            .query(contactUri, queryFields, null, null, null)
+        cursor?.use {
+            if (it.count == 0) {
+                return@use
+            }
+            it.moveToFirst()
+            val suspect = it.getString(0)
+            crimeDetailViewModel.crimeSuspect = suspect
+            binding.pickCrimeSuspectBtn.text = crimeDetailViewModel.crimeSuspect
+        }
+    }
+
+    private fun updateCrimePhoto() {
+        val filesDir = requireActivity().applicationContext.filesDir
+        val path = crimeDetailViewModel.crimePhotoFileName
+        photoFile = File(filesDir, path)
+        photoUri = FileProvider.getUriForFile(
+            requireActivity(),
+            "com.teenwolf3301.criminalintent.fileprovider",
+            photoFile
+        )
+        if (photoFile.exists()) {
+            binding.crimeImage.apply {
+                load(photoUri) {
+                    crossfade(true)
+                    crossfade(1000)
+                    transformations(CircleCropTransformation())
+                }
+                setOnClickListener {
+                    showPreviewPhotoDialog()
+                }
+            }
+        }
+    }
+
     private fun deleteCrime() {
         val builder = AlertDialog.Builder(requireContext())
         builder.apply {
@@ -201,22 +222,6 @@ class CrimeFragment : Fragment(R.layout.fragment_crime), FragmentResultListener 
             setMessage("Are you sure you want to delete ${crimeDetailViewModel.crimeTitle} crime?")
             create().show()
         }
-    }
-
-    private fun showPreviewPhotoDialog() {
-        // TODO
-    }
-
-    private fun showDatePickerDialog() {
-        DatePickerFragment
-            .newInstance(crimeDetailViewModel.crimeDate, REQUEST_DATE)
-            .show(childFragmentManager, REQUEST_DATE)
-    }
-
-    private fun showTimePickerDialog() {
-        TimePickerFragment
-            .newInstance(crimeDetailViewModel.crimeDate, REQUEST_TIME)
-            .show(childFragmentManager, REQUEST_TIME)
     }
 
     private fun createCrimeReport(): String {
