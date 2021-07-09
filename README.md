@@ -1,7 +1,8 @@
 # CriminalIntent
 
  This Kotlin Android app allows you to keep a record of your office colleagues mistakes. You can take a crime photo, select a suspect from your contact list, and send crime reports to your company.
-It was done as part of the training based on the book. In the future, it was slightly optimized and reworked.
+
+ It was done as part of the training based on the book. In the future, it was slightly optimized and reworked.
 
 ## Features
 
